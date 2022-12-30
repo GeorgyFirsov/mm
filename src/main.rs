@@ -6,6 +6,7 @@
 
 
 mod repo;
+mod error;
 
 extern crate clap;
 extern crate git2;

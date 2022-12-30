@@ -2,6 +2,8 @@ use std::path::Path;
 use std::fs;
 use git2::Repository;
 
+use crate::error::Error;
+
 
 /// Path to repository relative to user's home folder
 const MM_MAIN_REPO_FOLDER: &str = ".mm/repo/";
@@ -30,22 +32,25 @@ fn get_main_repo_path() -> String {
 
 
 /// Returns a repository ready to use
-pub(crate) fn open_repo() -> Result<Repository, git2::Error> {
+pub(crate) fn open_repo() -> Result<Repository, Error> {
     if !is_main_repo_folder_present() {
         //
         // No path is present, let's create it
         //
 
-        fs::create_dir_all(get_main_repo_folder());
+        if let Err(io_error) = fs::create_dir_all(get_main_repo_folder()) {
+            return Err(Error::from_io_error(io_error));
+        }
     }
 
     //
-    // Now let's try to open repository.
-    // If it is absent, we need to create 
-    // it first
+    // Now let's try to open repository. If it is absent, we 
+    // need to create it first
     //
 
-    Repository::open(get_main_repo_path())
-
-    // TODO: error handling
+    match Repository::open(get_main_repo_path()) {
+        Ok(repo) => Ok(repo),
+        Err(_) => Repository::init(get_main_repo_path())
+                      .map_err(Error::from_git_error)
+    }
 }
