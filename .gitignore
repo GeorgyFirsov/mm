@@ -1,1 +1,7 @@
+# Known folders
 /target
+
+# Hidden files
+.*
+!/.github
+!/.gitignore
