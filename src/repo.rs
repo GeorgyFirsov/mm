@@ -48,9 +48,7 @@ pub(crate) fn open_repo() -> Result<Repository, Error> {
     // need to create it first
     //
 
-    match Repository::open(get_main_repo_path()) {
-        Ok(repo) => Ok(repo),
-        Err(_) => Repository::init(get_main_repo_path())
-                      .map_err(Error::from_git_error)
-    }
+    Repository::open(get_main_repo_path())
+        .or_else(|_| Repository::init(get_main_repo_path()))
+        .map_err(Error::from_git_error)
 }
