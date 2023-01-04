@@ -54,7 +54,7 @@ pub(crate) fn open_repo() -> Result<git2::Repository, Error> {
         //
 
         get_repos_folder()
-            .ok_or(io::Error::new(io::ErrorKind::NotFound, ""))
+            .ok_or(io::Error::new(io::ErrorKind::NotFound, "cannot get repositories folder"))
             .and_then(|path| fs::create_dir_all(path.as_path()))
             .map_err(Error::from_io_error)?;
     }
@@ -65,7 +65,7 @@ pub(crate) fn open_repo() -> Result<git2::Repository, Error> {
     //
 
     get_main_repo_path()
-        .ok_or(git2::Error::new(git2::ErrorCode::NotFound, git2::ErrorClass::Filesystem, ""))
+        .ok_or(git2::Error::new(git2::ErrorCode::NotFound, git2::ErrorClass::Filesystem, "cannot get main repository"))
         .and_then(open_or_create_repository)
         .map_err(Error::from_git_error)
 }
