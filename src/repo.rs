@@ -1,46 +1,62 @@
-use std::path::Path;
+use std::io;
 use std::fs;
-use git2::Repository;
+use std::path::Path;
+use std::path::PathBuf;
+
+use dirs;
+use git2;
 
 use crate::error::Error;
 
 
-/// Path to repository relative to user's home folder
-const MM_MAIN_REPO_FOLDER: &str = ".mm/repo/";
+/// Path to repositories relative to user's home folder
+const MM_REPOS_FOLDER: &str = ".mm/repos/";
 
 /// Name of main repository
-const MM_MAIN_REPO_NAME: &str = "mm_repo";
+const MM_MAIN_REPO_NAME: &str = "mm_main";
 
 
-/// Get full repository folder path
-fn get_main_repo_folder() -> String {
-    "~/".to_owned() + MM_MAIN_REPO_FOLDER
+/// Get full repositories folder path
+fn get_repos_folder() -> Option<PathBuf> {
+    dirs::home_dir()
+        .and_then(|path| Some(path.join(MM_REPOS_FOLDER)))
 }
 
 
-/// Check if repository folder exists
-fn is_main_repo_folder_present() -> bool {
-    let repo = get_main_repo_folder();
-    Path::new(&repo).exists()
+/// Check if repositories folder exists
+fn is_repos_folder_present() -> bool {
+    match get_repos_folder() {
+        Some(path) => Path::new(&path).exists(),
+        None => false
+    }
 }
 
 
-/// Compose full repository path
-fn get_main_repo_path() -> String {
-    get_main_repo_folder() + MM_MAIN_REPO_NAME
+/// Compose full main repository path
+fn get_main_repo_path() -> Option<PathBuf> {
+    get_repos_folder()
+        .and_then(|path| Some(path.join(MM_MAIN_REPO_NAME)))
+}
+
+
+/// Open or create a repository by its path
+fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository, git2::Error> {
+    git2::Repository::open(path.clone())
+        .or_else(|_error| git2::Repository::init(path))
 }
 
 
 /// Returns a repository ready to use
-pub(crate) fn open_repo() -> Result<Repository, Error> {
-    if !is_main_repo_folder_present() {
+pub(crate) fn open_repo() -> Result<git2::Repository, Error> {
+    if !is_repos_folder_present() {
         //
         // No path is present, let's create it
         //
 
-        if let Err(io_error) = fs::create_dir_all(get_main_repo_folder()) {
-            return Err(Error::from_io_error(io_error));
-        }
+        get_repos_folder()
+            .ok_or(io::Error::new(io::ErrorKind::NotFound, ""))
+            .and_then(|path| fs::create_dir_all(path.as_path()))
+            .map_err(Error::from_io_error)?;
     }
 
     //
@@ -48,7 +64,8 @@ pub(crate) fn open_repo() -> Result<Repository, Error> {
     // need to create it first
     //
 
-    Repository::open(get_main_repo_path())
-        .or_else(|_| Repository::init(get_main_repo_path()))
+    get_main_repo_path()
+        .ok_or(git2::Error::new(git2::ErrorCode::NotFound, git2::ErrorClass::Filesystem, ""))
+        .and_then(open_or_create_repository)
         .map_err(Error::from_git_error)
 }

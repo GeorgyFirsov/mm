@@ -58,7 +58,7 @@ impl fmt::Display for Error {
         // intentionally ignore category (maybe for now)
         //
 
-        write!(f, "{}", self.msg)
+        write!(f, "Description: {} (category: {:?})", self.msg, self.category)
     }
 }
 

@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 git2 = "0.15"
 clap = "4.0.32"
+dirs = "4.0.0"
