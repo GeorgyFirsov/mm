@@ -1,13 +1,14 @@
 use std;
 use std::io;
 use std::fmt;
+use std::result;
 
 use git2;
 
 
 /// Enumeration with error categories
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
-enum ErrorCategory {
+pub(crate) enum ErrorCategory {
     /// Unspecified error
     Generic,
 
@@ -28,6 +29,13 @@ pub(crate) struct Error {
 
 
 impl Error {
+    pub(crate) fn from_string(s: &str, category: ErrorCategory) -> Self {
+        Error {
+            msg: s.to_owned(),
+            category: category
+        }
+    }
+
     /// Constructs an error from an error object
     pub(crate) fn from_error<E: std::error::Error>(err: E) -> Self {
         Error {
@@ -53,7 +61,7 @@ impl Error {
 
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         //
         // intentionally ignore category (maybe for now)
         //
@@ -68,3 +76,8 @@ impl std::error::Error for Error {
         &self.msg
     }
 }
+
+
+/// Crate-specific alias for `std::result::Result` instantiated 
+/// with `mm::error::Error`
+pub(crate) type Result<T> = result::Result<T, Error>;

@@ -1,12 +1,10 @@
-use std::io;
-use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 
 use git2;
 
 use crate::data;
-use crate::error::Error;
+use crate::misc;
+use crate::error::{ Error, Result, ErrorCategory };
 
 
 /// Path to repositories relative to mm's data folder
@@ -42,9 +40,10 @@ fn get_repo_path(repo_name: Option<&str>) -> Option<PathBuf> {
 
 
 /// Open or create a repository by its path
-fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository, git2::Error> {
+fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
     git2::Repository::open(path.clone())
         .or_else(|_error| git2::Repository::init(path))
+        .map_err(Error::from_git_error)
 }
 
 
@@ -53,16 +52,15 @@ fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository, git2::Er
 /// Supports opening a repository by its name or a main repo if no name given.
 /// 
 /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
-pub(crate) fn open_repo(repo_name: Option<&str>) -> Result<git2::Repository, Error> {
+pub(crate) fn open_repo(repo_name: Option<&str>) -> Result<git2::Repository> {
     if !is_repos_folder_present() {
         //
         // No path is present, let's create it
         //
 
         get_repos_folder()
-            .ok_or(io::Error::new(io::ErrorKind::NotFound, "cannot get repositories folder"))
-            .and_then(|path| fs::create_dir_all(path.as_path()))
-            .map_err(Error::from_io_error)?;
+            .ok_or(Error::from_string("cannot get repositories folder", ErrorCategory::Os))
+            .and_then(misc::create_folder_recursive)?;
     }
 
     //
@@ -71,7 +69,6 @@ pub(crate) fn open_repo(repo_name: Option<&str>) -> Result<git2::Repository, Err
     //
 
     get_repo_path(repo_name)
-        .ok_or(git2::Error::new(git2::ErrorCode::NotFound, git2::ErrorClass::Filesystem, "cannot get main repository"))
+        .ok_or(Error::from_string("cannot get repository path", ErrorCategory::Os))
         .and_then(open_or_create_repository)
-        .map_err(Error::from_git_error)
 }
