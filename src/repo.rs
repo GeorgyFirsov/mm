@@ -32,10 +32,12 @@ fn is_repos_folder_present() -> bool {
 }
 
 
-/// Compose full main repository path
-fn get_main_repo_path() -> Option<PathBuf> {
+/// Compose full repository path by its name
+/// 
+/// * `repo_name` - a name of repository (or `None` for a main repository)
+fn get_repo_path(repo_name: Option<&str>) -> Option<PathBuf> {
     get_repos_folder()
-        .and_then(|path| Some(path.join(MM_MAIN_REPO_NAME)))
+        .and_then(|path| Some(path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME))))
 }
 
 
@@ -51,7 +53,7 @@ fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository, git2::Er
 /// Supports opening a repository by its name or a main repo if no name given.
 /// 
 /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
-pub(crate) fn open_repo(repo_name: Option<PathBuf>) -> Result<git2::Repository, Error> {
+pub(crate) fn open_repo(repo_name: Option<&str>) -> Result<git2::Repository, Error> {
     if !is_repos_folder_present() {
         //
         // No path is present, let's create it
@@ -68,7 +70,7 @@ pub(crate) fn open_repo(repo_name: Option<PathBuf>) -> Result<git2::Repository, 
     // need to create it first
     //
 
-    repo_name.or_else(get_main_repo_path)
+    get_repo_path(repo_name)
         .ok_or(git2::Error::new(git2::ErrorCode::NotFound, git2::ErrorClass::Filesystem, "cannot get main repository"))
         .and_then(open_or_create_repository)
         .map_err(Error::from_git_error)
