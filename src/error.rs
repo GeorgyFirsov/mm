@@ -29,6 +29,7 @@ pub(crate) struct Error {
 
 
 impl Error {
+    /// Constructs an error from string description and specific category
     pub(crate) fn from_string(s: &str, category: ErrorCategory) -> Self {
         Error {
             msg: s.to_owned(),
