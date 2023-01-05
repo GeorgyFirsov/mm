@@ -3,14 +3,14 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
-use dirs;
 use git2;
 
+use crate::data;
 use crate::error::Error;
 
 
-/// Path to repositories relative to user's home folder
-const MM_REPOS_FOLDER: &str = ".mm/repos/";
+/// Path to repositories relative to mm's data folder
+const MM_REPOS_SUBFOLDER: &str = "repos/";
 
 /// Name of main repository
 const MM_MAIN_REPO_NAME: &str = "mm_main";
@@ -18,8 +18,8 @@ const MM_MAIN_REPO_NAME: &str = "mm_main";
 
 /// Get full repositories folder path
 fn get_repos_folder() -> Option<PathBuf> {
-    dirs::home_dir()
-        .and_then(|path| Some(path.join(MM_REPOS_FOLDER)))
+    data::get_data_folder()
+        .and_then(|path| Some(path.join(MM_REPOS_SUBFOLDER)))
 }
 
 
