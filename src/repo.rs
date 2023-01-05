@@ -23,10 +23,12 @@ fn get_repos_folder() -> Option<PathBuf> {
 
 /// Check if repositories folder exists
 fn is_repos_folder_present() -> bool {
-    match get_repos_folder() {
-        Some(path) => Path::new(&path).exists(),
-        None => false
-    }
+    //
+    // Well, let's assume, that inaccessible path is inexistent
+    //
+
+    get_repos_folder()
+        .map_or(false, |path| path.exists())
 }
 
 
