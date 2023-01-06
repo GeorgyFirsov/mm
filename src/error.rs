@@ -79,6 +79,6 @@ impl std::error::Error for Error {
 }
 
 
-/// Crate-specific alias for `std::result::Result` instantiated 
-/// with `mm::error::Error`
+/// Crate-specific alias for [`std::result::Result`] instantiated 
+/// with [`crate::error::Error`]
 pub(crate) type Result<T> = result::Result<T, Error>;
