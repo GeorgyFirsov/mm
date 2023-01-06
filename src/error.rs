@@ -29,16 +29,21 @@ pub(crate) struct Error {
 
 
 impl Error {
-    /// Constructs an error from string description and specific category
+    /// Constructs an error from string description and specific category.
+    /// 
+    /// * `s` - string with error description
+    /// * `category` - error category (see [`crate::error::ErrorCategory`])
     pub(crate) fn from_string(s: &str, category: ErrorCategory) -> Self {
         Error {
             msg: s.to_owned(),
             category: category
         }
     }
-    
 
-    /// Constructs an error from an error object
+
+    /// Constructs an error from an error object.
+    /// 
+    /// * `err` - generic error instance (needs to implement [`std::error::Error`] trait)
     pub(crate) fn from_error<E: std::error::Error>(err: E) -> Self {
         Error {
             msg: err.to_string(),
@@ -47,7 +52,9 @@ impl Error {
     }
 
 
-    /// Constructs an error from an I/O error object
+    /// Constructs an error from an I/O error object.
+    /// 
+    /// * `err` - I/O error instance ([`std::io::Error`])
     pub(crate) fn from_io_error(err: io::Error) -> Self {
         let mut res = Error::from_error(err);
         res.category = ErrorCategory::Os;
@@ -55,7 +62,9 @@ impl Error {
     }
 
 
-    /// Constructs an error from a git2 error object
+    /// Constructs an error from a git2 error object.
+    /// 
+    /// * `err` - git error instance ([`git2::Error`])
     pub(crate) fn from_git_error(err: git2::Error) -> Self {
         let mut res = Error::from_error(err);
         res.category = ErrorCategory::Git;

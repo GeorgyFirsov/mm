@@ -7,21 +7,21 @@ use crate::misc;
 use crate::error::{ Error, Result, ErrorCategory };
 
 
-/// Path to repositories relative to mm's data folder
+/// Path to repositories relative to mm's data folder.
 const MM_REPOS_SUBFOLDER: &str = "repos/";
 
-/// Name of main repository
+/// Name of main repository.
 const MM_MAIN_REPO_NAME: &str = "mm_main_local";
 
 
-/// Get full repositories folder path
+/// Get full repositories folder path.
 fn get_repos_folder() -> Option<PathBuf> {
     data::get_data_folder()
         .and_then(|path| Some(path.join(MM_REPOS_SUBFOLDER)))
 }
 
 
-/// Check if repositories folder exists
+/// Check if repositories folder exists.
 fn is_repos_folder_present() -> bool {
     //
     // Well, let's assume, that inaccessible path is inexistent
@@ -32,7 +32,7 @@ fn is_repos_folder_present() -> bool {
 }
 
 
-/// Compose full repository path by its name
+/// Compose full repository path by its name.
 /// 
 /// * `repo_name` - a name of repository (or `None` for a main repository)
 fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
@@ -41,24 +41,31 @@ fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
 }
 
 
-/// Open or create a repository by its path
+/// Open or create a git repository by its path.
+/// 
+/// * `path` - path to the repository's directory
 fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
-    git2::Repository::open(path.clone())
+    git2::Repository::open(path.to_owned())
         .or_else(|_error| git2::Repository::init(path))
         .map_err(Error::from_git_error)
 }
 
 
-/// A structure, that describes a repository for notes
+/// A structure, that describes a repository for notes.
 pub(crate) struct Repository {
+    /// Internal git repository, that manages version control
     internal_repo: git2::Repository,
+
+    /// Name of the repository
     name: String,
+
+    /// Optional list of remotes. `None` if repository has no remotes
     remotes: Option<git2::string_array::StringArray>,
 }
 
 
 impl Repository {
-    /// Returns a repository ready to use
+    /// Returns a repository ready to use.
     /// 
     /// Supports opening a repository by its name or a main repo if no name given.
     /// 
@@ -71,10 +78,6 @@ impl Repository {
         //
 
         if !is_repos_folder_present() {
-            //
-            // No path is present, let's try to create it
-            //
-    
             get_repos_folder()
                 .ok_or(Error::from_string("cannot get repositories folder", ErrorCategory::Os))
                 .and_then(misc::create_folder_recursive)?;
@@ -92,9 +95,12 @@ impl Repository {
         Repository::from_git_repository(internal_repo, repo_name)
     }
 
-    
+
     /// Internal constructor, that constructs a repository instance from 
-    /// internal [`git2::Repository`] instance
+    /// internal [`git2::Repository`] instance.
+    /// 
+    /// * `repo` - git repository instance to wrap
+    /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
     fn from_git_repository(repo: git2::Repository, repo_name: Option<&str>) -> Result<Repository> {
         let remotes = repo
             .remotes()
@@ -102,10 +108,12 @@ impl Repository {
 
         Ok(Repository { 
             internal_repo: repo, 
+
             name: repo_name
                 .unwrap_or(MM_MAIN_REPO_NAME)
                 .to_owned(), 
-            remotes: remotes 
+
+            remotes: remotes,
         })
     }
     
