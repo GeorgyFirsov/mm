@@ -92,6 +92,7 @@ impl Repository {
         Repository::from_git_repository(internal_repo, repo_name)
     }
 
+    
     /// Internal constructor, that constructs a repository instance from 
     /// internal [`git2::Repository`] instance
     fn from_git_repository(repo: git2::Repository, repo_name: Option<&str>) -> Result<Repository> {
