@@ -53,7 +53,7 @@ fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
 pub(crate) struct Repository {
     internal_repo: git2::Repository,
     name: String,
-    remotes: Option<Vec<String>>, // TODO: support remotes
+    remotes: Option<git2::string_array::StringArray>,
 }
 
 
@@ -89,12 +89,23 @@ impl Repository {
             .ok_or(Error::from_string("cannot get repository path", ErrorCategory::Os))
             .and_then(open_or_create_repository)?;
 
+        Repository::from_git_repository(internal_repo, repo_name)
+    }
+
+    /// Internal constructor, that constructs a repository instance from 
+    /// internal [`git2::Repository`] instance
+    fn from_git_repository(repo: git2::Repository, repo_name: Option<&str>) -> Result<Repository> {
+        let remotes = repo
+            .remotes()
+            .ok();
+
         Ok(Repository { 
-            internal_repo: internal_repo, 
+            internal_repo: repo, 
             name: repo_name
                 .unwrap_or(MM_MAIN_REPO_NAME)
                 .to_owned(), 
-            remotes: None
+            remotes: remotes 
         })
     }
+    
 }
