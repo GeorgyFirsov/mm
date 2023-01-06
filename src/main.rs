@@ -16,8 +16,5 @@ extern crate dirs;
 
 
 fn main() {
-    let r = repo::Repository::open_or_create(None)
-        .unwrap();
-
-    println!("");
+    
 }
