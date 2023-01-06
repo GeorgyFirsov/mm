@@ -35,7 +35,7 @@ fn is_repos_folder_present() -> bool {
 /// Compose full repository path by its name
 /// 
 /// * `repo_name` - a name of repository (or `None` for a main repository)
-fn get_repo_path(repo_name: Option<&str>) -> Option<PathBuf> {
+fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
     get_repos_folder()
         .and_then(|path| Some(path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME))))
 }
@@ -49,28 +49,52 @@ fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
 }
 
 
-/// Returns a repository ready to use
-/// 
-/// Supports opening a repository by its name or a main repo if no name given.
-/// 
-/// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
-pub(crate) fn open_repo(repo_name: Option<&str>) -> Result<git2::Repository> {
-    if !is_repos_folder_present() {
+/// A structure, that describes a repository for notes
+pub(crate) struct Repository {
+    internal_repo: git2::Repository,
+    name: String,
+    remotes: Option<Vec<String>>, // TODO: support remotes
+}
+
+
+impl Repository {
+    /// Returns a repository ready to use
+    /// 
+    /// Supports opening a repository by its name or a main repo if no name given.
+    /// 
+    /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
+    pub(crate) fn open_or_create(repo_name: Option<&str>) -> Result<Self> {
         //
-        // No path is present, let's create it
+        // Firstly we need to ensure, that we have repositories folder.
+        // App may be run for the first time or data may be erased, so
+        // we need to create the folder if necessary
         //
 
-        get_repos_folder()
-            .ok_or(Error::from_string("cannot get repositories folder", ErrorCategory::Os))
-            .and_then(misc::create_folder_recursive)?;
+        if !is_repos_folder_present() {
+            //
+            // No path is present, let's try to create it
+            //
+    
+            get_repos_folder()
+                .ok_or(Error::from_string("cannot get repositories folder", ErrorCategory::Os))
+                .and_then(misc::create_folder_recursive)?;
+        }
+
+        //
+        // Now let's try to open an internal git repository.
+        // If it doesn't exists, it is neessary to create it.
+        //
+
+        let internal_repo = get_repo_path(&repo_name)
+            .ok_or(Error::from_string("cannot get repository path", ErrorCategory::Os))
+            .and_then(open_or_create_repository)?;
+
+        Ok(Repository { 
+            internal_repo: internal_repo, 
+            name: repo_name
+                .unwrap_or(MM_MAIN_REPO_NAME)
+                .to_owned(), 
+            remotes: None
+        })
     }
-
-    //
-    // Now let's try to open repository. If it is absent, we 
-    // need to create it first
-    //
-
-    get_repo_path(repo_name)
-        .ok_or(Error::from_string("cannot get repository path", ErrorCategory::Os))
-        .and_then(open_or_create_repository)
 }
