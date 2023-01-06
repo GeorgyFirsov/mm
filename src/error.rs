@@ -36,6 +36,7 @@ impl Error {
             category: category
         }
     }
+    
 
     /// Constructs an error from an error object
     pub(crate) fn from_error<E: std::error::Error>(err: E) -> Self {
@@ -45,12 +46,14 @@ impl Error {
         }
     }
 
+
     /// Constructs an error from an I/O error object
     pub(crate) fn from_io_error(err: io::Error) -> Self {
         let mut res = Error::from_error(err);
         res.category = ErrorCategory::Os;
         res
     }
+
 
     /// Constructs an error from a git2 error object
     pub(crate) fn from_git_error(err: git2::Error) -> Self {
