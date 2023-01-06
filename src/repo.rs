@@ -11,7 +11,7 @@ use crate::error::{ Error, Result, ErrorCategory };
 const MM_REPOS_SUBFOLDER: &str = "repos/";
 
 /// Name of main repository
-const MM_MAIN_REPO_NAME: &str = "mm_main";
+const MM_MAIN_REPO_NAME: &str = "mm_main_local";
 
 
 /// Get full repositories folder path
