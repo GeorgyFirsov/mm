@@ -138,9 +138,7 @@ impl Repository {
             .strip_prefix(workdir)
             .expect("workdir is not a prefix of path");
 
-        self.internal_repo
-            .index()
-            .and_then(|mut index| index.add_path(relative_note_path))?;
+        self.add_note_internal(relative_note_path)?;
 
         Ok(note_path)
     }
@@ -184,6 +182,20 @@ impl Repository {
 
             remotes: remotes,
         })
+    }
+
+
+    /// Adds a note to repository (internal implementation).
+    /// 
+    /// Calls `git2::Index::add_all` in order to take `.gitignore` into 
+    /// account, because `git2::Index::add_path` forces files to be added.
+    /// 
+    /// * `path` - relative to working directory path to the note
+    fn add_note_internal(&self, path: &Path) -> Result<()> {
+        self.internal_repo
+            .index()
+            .and_then(|mut index| index.add_all([path].iter(), git2::IndexAddOption::DEFAULT, None))
+            .map_err(Error::from)
     }
 
 
