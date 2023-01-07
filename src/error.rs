@@ -17,6 +17,9 @@ pub(crate) enum ErrorCategory {
 
     /// Error from operating system
     Os,
+
+    /// Repository error
+    Repo,
 }
 
 

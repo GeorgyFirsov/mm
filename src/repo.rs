@@ -17,7 +17,7 @@ const MM_MAIN_REPO_NAME: &str = "mm_main_local";
 /// Get full repositories folder path.
 fn get_repos_folder() -> Option<PathBuf> {
     data::get_data_folder()
-        .and_then(|path| Some(path.join(MM_REPOS_SUBFOLDER)))
+        .map(|path| path.join(MM_REPOS_SUBFOLDER))
 }
 
 
@@ -37,7 +37,7 @@ fn is_repos_folder_present() -> bool {
 /// * `repo_name` - a name of repository (or `None` for a main repository)
 fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
     get_repos_folder()
-        .and_then(|path| Some(path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME))))
+        .map(|path| path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME)))
 }
 
 
@@ -117,4 +117,46 @@ impl Repository {
         })
     }
     
+
+    /// Adds a note to repository. Returns a writable handle to created file.
+    /// 
+    /// * `note` - name of a note to add
+    /// * `folder` - optional folder to add note to (pass `None` to add note to root folder)
+    pub(crate) fn add_note(self, name: &str, folder: Option<&str>) -> Result<PathBuf> {
+        let workdir = self.internal_repo
+            .workdir()
+            .ok_or(Error::from_string("cannot get working directory", ErrorCategory::Git))?;
+
+        //
+        // Firstly check a folder for existence. If it does not exist,
+        // then it must be created.
+        //
+
+        let folder_path = workdir.join(folder.unwrap_or("" /* append nothing for root */));
+        if !folder_path.exists() {
+            misc::create_folder(&folder_path)?;
+        }
+
+        //
+        // Now let's try to create a new file. This call should fail, if it exists.
+        //
+
+        let note_path = folder_path.join(name);
+        misc::touch_new_file(&note_path)?;
+
+        //
+        // Now let's add the new file to repository and return its path
+        //
+
+        let relative_note_path = note_path
+            .strip_prefix(workdir)
+            .unwrap();
+
+        self.internal_repo
+            .index()
+            .and_then(|mut index| index.add_path(relative_note_path))
+            .map_err(Error::from_git_error)?;
+
+        Ok(note_path)
+    }
 }
