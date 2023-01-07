@@ -51,6 +51,24 @@ fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
 }
 
 
+/// Verifies, that `name` is a valid name for folder with notes.
+/// 
+/// Checks if it is not empty and contains only one level
+/// of structure (names with slashes are considered invalid).
+/// 
+/// * `name` - name of folder to verify
+fn ensure_valid_folder(name: &str) -> Result<()> {
+    let valid = 
+        !name.is_empty() && 
+        !name.contains("/") && 
+        !name.contains("\\");
+
+    valid
+        .then_some(())
+        .ok_or(Error::from_string(format!("invalid folder name: '{}'", name).as_str(), ErrorCategory::Repo))
+}
+
+
 /// A structure, that describes a repository for notes.
 pub(crate) struct Repository {
     /// Internal git repository, that manages version control
@@ -105,7 +123,7 @@ impl Repository {
         // Folder name if any must be valid
         //
 
-        folder.map_or(Ok(()), Repository::ensure_valid_folder)?;
+        folder.map_or(Ok(()), ensure_valid_folder)?;
 
         //
         // Firstly check a folder for existence. If it does not exist,
@@ -152,7 +170,7 @@ impl Repository {
         // Firstly we need to ensure, that we create a valid folder
         //
 
-        Repository::ensure_valid_folder(name)?;
+        ensure_valid_folder(name)?;
 
         //
         // Just create a directory. Nothing else is required.
@@ -216,23 +234,5 @@ impl Repository {
         self.internal_repo
             .workdir()
             .ok_or(Error::from_string("cannot get working directory", ErrorCategory::Git))
-    }
-
-
-    /// Verifies, that `name` is a valid name for folder with notes.
-    /// 
-    /// Checks if it is not empty and contains only one level
-    /// of structure (names with slashes are considered invalid).
-    /// 
-    /// * `name` - name of folder to verify
-    fn ensure_valid_folder(name: &str) -> Result<()> {
-        let valid = 
-            !name.is_empty() && 
-            !name.contains("/") && 
-            !name.contains("\\");
-
-        valid
-            .then_some(())
-            .ok_or(Error::from_string(format!("invalid folder name: '{}'", name).as_str(), ErrorCategory::Repo))
     }
 }
