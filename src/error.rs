@@ -47,7 +47,7 @@ impl Error {
     /// Constructs an error from an error object.
     /// 
     /// * `err` - generic error instance (needs to implement [`std::error::Error`] trait)
-    pub(crate) fn from_error<E: std::error::Error>(err: E) -> Self {
+    fn from_error<E: std::error::Error>(err: E) -> Self {
         Error {
             msg: err.to_string(),
             category: ErrorCategory::Generic
