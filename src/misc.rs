@@ -12,7 +12,7 @@ use crate::error::{ Error, Result };
 /// * `path` - path to create
 pub(crate) fn create_folder_recursive<P: AsRef<Path>>(path: P) -> Result<()> {
     fs::create_dir_all(path)
-        .map_err(Error::from_io_error)
+        .map_err(Error::from)
 }
 
 
@@ -24,7 +24,7 @@ pub(crate) fn create_folder_recursive<P: AsRef<Path>>(path: P) -> Result<()> {
 /// * `path` - path to create
 pub(crate) fn create_folder<P: AsRef<Path>>(path: P) -> Result<()> {
     fs::create_dir(path)
-        .map_err(Error::from_io_error)
+        .map_err(Error::from)
 }
 
 
@@ -38,6 +38,6 @@ pub(crate) fn touch_new_file<P: AsRef<Path>>(path: P) -> Result<()> {
         .write(true)
         .create_new(true)
         .open(path)
-        .map_err(Error::from_io_error)
+        .map_err(Error::from)
         .map(|_file| ())
 }

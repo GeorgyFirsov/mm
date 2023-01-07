@@ -47,7 +47,7 @@ fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
 fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
     git2::Repository::open(path.to_owned())
         .or_else(|_error| git2::Repository::init(path))
-        .map_err(Error::from_git_error)
+        .map_err(Error::from)
 }
 
 
@@ -136,12 +136,11 @@ impl Repository {
 
         let relative_note_path = note_path
             .strip_prefix(workdir)
-            .unwrap();
+            .expect("workdir is not a prefix of path");
 
         self.internal_repo
             .index()
-            .and_then(|mut index| index.add_path(relative_note_path))
-            .map_err(Error::from_git_error)?;
+            .and_then(|mut index| index.add_path(relative_note_path))?;
 
         Ok(note_path)
     }

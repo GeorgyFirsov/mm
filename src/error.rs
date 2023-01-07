@@ -53,26 +53,6 @@ impl Error {
             category: ErrorCategory::Generic
         }
     }
-
-
-    /// Constructs an error from an I/O error object.
-    /// 
-    /// * `err` - I/O error instance ([`std::io::Error`])
-    pub(crate) fn from_io_error(err: io::Error) -> Self {
-        let mut res = Error::from_error(err);
-        res.category = ErrorCategory::Os;
-        res
-    }
-
-
-    /// Constructs an error from a git2 error object.
-    /// 
-    /// * `err` - git error instance ([`git2::Error`])
-    pub(crate) fn from_git_error(err: git2::Error) -> Self {
-        let mut res = Error::from_error(err);
-        res.category = ErrorCategory::Git;
-        res
-    }
 }
 
 
@@ -90,6 +70,24 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {
     fn description(&self) -> &str {
         &self.msg
+    }
+}
+
+
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Self {
+        let mut res = Error::from_error(err);
+        res.category = ErrorCategory::Os;
+        res
+    }
+}
+
+
+impl From<git2::Error> for Error {
+    fn from(err: git2::Error) -> Self {
+        let mut res = Error::from_error(err);
+        res.category = ErrorCategory::Git;
+        res
     }
 }
 
