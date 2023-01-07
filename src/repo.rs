@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 
 use git2;
 
@@ -94,47 +94,27 @@ impl Repository {
 
         Repository::from_git_repository(internal_repo, repo_name)
     }
-
-
-    /// Internal constructor, that constructs a repository instance from 
-    /// internal [`git2::Repository`] instance.
-    /// 
-    /// * `repo` - git repository instance to wrap
-    /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
-    fn from_git_repository(repo: git2::Repository, repo_name: Option<&str>) -> Result<Repository> {
-        let remotes = repo
-            .remotes()
-            .ok();
-
-        Ok(Repository { 
-            internal_repo: repo, 
-
-            name: repo_name
-                .unwrap_or(MM_MAIN_REPO_NAME)
-                .to_owned(), 
-
-            remotes: remotes,
-        })
-    }
     
 
-    /// Adds a note to repository. Returns a writable handle to created file.
+    /// Adds a note to repository.
     /// 
     /// * `note` - name of a note to add
     /// * `folder` - optional folder to add note to (pass `None` to add note to root folder)
-    pub(crate) fn add_note(self, name: &str, folder: Option<&str>) -> Result<PathBuf> {
-        let workdir = self.internal_repo
-            .workdir()
-            .ok_or(Error::from_string("cannot get working directory", ErrorCategory::Git))?;
-
+    pub(crate) fn add_note(&self, name: &str, folder: Option<&str>) -> Result<PathBuf> {
         //
         // Firstly check a folder for existence. If it does not exist,
         // then it must be created.
         //
 
+        let workdir = self.get_workdir()?;
         let folder_path = workdir.join(folder.unwrap_or("" /* append nothing for root */));
         if !folder_path.exists() {
-            misc::create_folder(&folder_path)?;
+            //
+            // Workdir is already present, so I can unwrap folder parameter.
+            // It cannot be None or empty here.
+            //
+
+            self.add_folder_internal(folder.unwrap(), workdir)?;
         }
 
         //
@@ -158,5 +138,60 @@ impl Repository {
             .map_err(Error::from_git_error)?;
 
         Ok(note_path)
+    }
+
+
+    /// Adds a folder to repository. 
+    /// 
+    /// * `name` - name of a folder to add
+    pub(crate) fn add_folder(&self, name: &str) -> Result<()> {
+        //
+        // Just create a directory. Nothing else is required.
+        //
+
+        self.get_workdir()
+            .and_then(|workdir| self.add_folder_internal(name, workdir))
+    }
+
+
+    /// Internal constructor, that constructs a repository instance from 
+    /// internal [`git2::Repository`] instance.
+    /// 
+    /// * `repo` - git repository instance to wrap
+    /// * `repo_name` - a name of repository to open (pass `None` to open a main repository)
+    fn from_git_repository(repo: git2::Repository, repo_name: Option<&str>) -> Result<Repository> {
+        let remotes = repo
+            .remotes()
+            .ok();
+
+        Ok(Repository { 
+            internal_repo: repo, 
+
+            name: repo_name
+                .unwrap_or(MM_MAIN_REPO_NAME)
+                .to_owned(), 
+
+            remotes: remotes,
+        })
+    }
+
+
+    /// Adds a folder to repository (internal implementation). 
+    /// 
+    /// Used for optimization: sometimes workdir is already known, so we can 
+    /// skip its acquisition.
+    /// 
+    /// * `name` - name of a folder to add
+    /// * `workdir` - repo's working directory
+    fn add_folder_internal(&self, name: &str, workdir: &Path) -> Result<()> {
+        misc::create_folder(workdir.join(name))
+    }
+
+
+    /// Obtains a working directory for current repository.
+    fn get_workdir(&self) -> Result<&Path> {
+        self.internal_repo
+            .workdir()
+            .ok_or(Error::from_string("cannot get working directory", ErrorCategory::Git))
     }
 }
