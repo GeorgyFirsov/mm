@@ -33,7 +33,10 @@ Repositories component provides a way to:
 - link a local repository to a remote one (except `mm_main_local`);
 - clone a remote repository;
 - add a folder to a repository;
+- remove an empty folder from a repository;
+- remove a folder with all notes from a repository;
 - add a note to a repository;
+- remove a note from a repository;
 - modify a note and commit changes;
 - restore a signle note to some previous state;
 - fetch remote changes;
