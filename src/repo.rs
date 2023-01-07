@@ -101,6 +101,9 @@ impl Repository {
     /// * `note` - name of a note to add
     /// * `folder` - optional folder to add note to (pass `None` to add note to root folder)
     pub(crate) fn add_note(&self, name: &str, folder: Option<&str>) -> Result<PathBuf> {
+        folder
+            .map_or(Ok(()), Repository::ensure_valid_folder)?;
+
         //
         // Firstly check a folder for existence. If it does not exist,
         // then it must be created.
@@ -145,6 +148,8 @@ impl Repository {
     /// 
     /// * `name` - name of a folder to add
     pub(crate) fn add_folder(&self, name: &str) -> Result<()> {
+        Repository::ensure_valid_folder(name)?;
+
         //
         // Just create a directory. Nothing else is required.
         //
@@ -193,5 +198,23 @@ impl Repository {
         self.internal_repo
             .workdir()
             .ok_or(Error::from_string("cannot get working directory", ErrorCategory::Git))
+    }
+
+
+    /// Verifies, that `name` is a valid name for folder with notes.
+    /// 
+    /// Checks if it is not empty and contains only one level
+    /// of structure (names with slashes are considered invalid).
+    /// 
+    /// * `name` - name of folder to verify
+    fn ensure_valid_folder(name: &str) -> Result<()> {
+        let valid = 
+            !name.is_empty() && 
+            !name.contains("/") && 
+            !name.contains("\\");
+
+        valid
+            .then_some(())
+            .ok_or(Error::from_string(format!("invalid folder name: '{}'", name).as_str(), ErrorCategory::Repo))
     }
 }
