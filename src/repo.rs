@@ -101,8 +101,11 @@ impl Repository {
     /// * `note` - name of a note to add
     /// * `folder` - optional folder to add note to (pass `None` to add note to root folder)
     pub(crate) fn add_note(&self, name: &str, folder: Option<&str>) -> Result<PathBuf> {
-        folder
-            .map_or(Ok(()), Repository::ensure_valid_folder)?;
+        //
+        // Folder name if any must be valid
+        //
+
+        folder.map_or(Ok(()), Repository::ensure_valid_folder)?;
 
         //
         // Firstly check a folder for existence. If it does not exist,
@@ -148,6 +151,10 @@ impl Repository {
     /// 
     /// * `name` - name of a folder to add
     pub(crate) fn add_folder(&self, name: &str) -> Result<()> {
+        //
+        // Firstly we need to ensure, that we create a valid folder
+        //
+
         Repository::ensure_valid_folder(name)?;
 
         //
