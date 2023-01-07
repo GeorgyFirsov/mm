@@ -11,6 +11,7 @@ The app consists of several components:
 - data components: it is responsible for storing any application's data, such as configurations
   and repositories;
 - tree controller: it provides an interface to notes, folders and repositories;
+- viewer;
 - editor.
 
 ## Components responsibility
