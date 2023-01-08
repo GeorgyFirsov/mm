@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use super::defs;
+use super::{ MM_REPOS_SUBFOLDER, MM_MAIN_REPO_NAME };
 use crate::data;
 use crate::error::{ Result, Error, ErrorCategory };
 
@@ -8,7 +8,7 @@ use crate::error::{ Result, Error, ErrorCategory };
 /// Get full repositories folder path.
 pub(super) fn get_repos_folder() -> Option<PathBuf> {
     data::get_data_folder()
-        .map(|path| path.join(defs::MM_REPOS_SUBFOLDER))
+        .map(|path| path.join(MM_REPOS_SUBFOLDER))
 }
 
 
@@ -28,7 +28,7 @@ pub(super) fn is_repos_folder_present() -> bool {
 /// * `repo_name` - a name of repository (or `None` for a main repository)
 pub(super) fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
     get_repos_folder()
-        .map(|path| path.join(repo_name.unwrap_or(defs::MM_MAIN_REPO_NAME)))
+        .map(|path| path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME)))
 }
 
 

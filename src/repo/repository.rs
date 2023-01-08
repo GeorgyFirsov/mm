@@ -2,8 +2,8 @@ use std::path::{ Path, PathBuf };
 
 use git2;
 
+use super::{ MM_MAIN_REPO_NAME };
 use super::helpers;
-use super::defs;
 use crate::misc;
 use crate::error::{ Error, Result, ErrorCategory };
 
@@ -134,7 +134,7 @@ impl Repository {
             internal_repo: repo, 
 
             name: repo_name
-                .unwrap_or(defs::MM_MAIN_REPO_NAME)
+                .unwrap_or(MM_MAIN_REPO_NAME)
                 .to_owned(), 
 
             remotes: remotes,
