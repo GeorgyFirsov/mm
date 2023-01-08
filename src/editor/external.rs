@@ -2,6 +2,7 @@ use std::process;
 use std::path::Path;
 use std::ffi::OsString;
 
+use super::runner::Editor;
 use crate::error::{ Error, ErrorCategory, Result };
 
 
@@ -19,19 +20,18 @@ pub(crate) trait ExternalEditor {
 }
 
 
-/// Runs an external editor and waits for completion.
-/// 
-/// Fails if editor finishes unsuccessfully.
-/// 
-/// * `note_path` - full path to a note to edit
-/// * `editor` - optional editor wrapper (see [`crate::editor::ExternalEditor`]). 
-///              Pass `None` to run built-in xi-based one.
-pub(super) fn run_editor<E: ExternalEditor>(note_path: &Path, editor: E) -> Result<()> {
-    process::Command::new(editor.executable())
-        .args(editor.make_args(note_path))
-        .spawn()
-        .map_err(Error::from)
-        .and_then(wait_editor)
+impl<E: ExternalEditor> Editor for E {
+    fn run(&self, note_path: &Path) -> Result<()> {
+        //
+        // Just launch a child process and wait for its completion
+        //
+
+        process::Command::new(self.executable())
+            .args(self.make_args(note_path))
+            .spawn()
+            .map_err(Error::from)
+            .and_then(wait_editor)
+    }
 }
 
 
