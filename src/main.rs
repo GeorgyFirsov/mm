@@ -18,10 +18,5 @@ extern crate dirs;
 
 
 fn main() {
-    let r = repo::Repository::open_or_create(None)
-        .unwrap();
-
-    println!("{:?}", r.add_note("some_note", None).expect("fail").as_os_str());
-
-    //r.commit_changes().unwrap();
+    
 }
