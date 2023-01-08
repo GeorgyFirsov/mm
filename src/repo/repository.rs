@@ -2,71 +2,10 @@ use std::path::{ Path, PathBuf };
 
 use git2;
 
-use crate::data;
+use super::helpers;
+use super::defs;
 use crate::misc;
 use crate::error::{ Error, Result, ErrorCategory };
-
-
-/// Path to repositories relative to mm's data folder.
-const MM_REPOS_SUBFOLDER: &str = "repos/";
-
-/// Name of main repository.
-const MM_MAIN_REPO_NAME: &str = "mm_main_local";
-
-
-/// Get full repositories folder path.
-fn get_repos_folder() -> Option<PathBuf> {
-    data::get_data_folder()
-        .map(|path| path.join(MM_REPOS_SUBFOLDER))
-}
-
-
-/// Check if repositories folder exists.
-fn is_repos_folder_present() -> bool {
-    //
-    // Well, let's assume, that inaccessible path is inexistent
-    //
-
-    get_repos_folder()
-        .map_or(false, |path| path.exists())
-}
-
-
-/// Compose full repository path by its name.
-/// 
-/// * `repo_name` - a name of repository (or `None` for a main repository)
-fn get_repo_path(repo_name: &Option<&str>) -> Option<PathBuf> {
-    get_repos_folder()
-        .map(|path| path.join(repo_name.unwrap_or(MM_MAIN_REPO_NAME)))
-}
-
-
-/// Open or create a git repository by its path.
-/// 
-/// * `path` - path to the repository's directory
-fn open_or_create_repository(path: PathBuf) -> Result<git2::Repository> {
-    git2::Repository::open(path.to_owned())
-        .or_else(|_error| git2::Repository::init(path))
-        .map_err(Error::from)
-}
-
-
-/// Verifies, that `name` is a valid name for folder with notes.
-/// 
-/// Checks if it is not empty and contains only one level
-/// of structure (names with slashes are considered invalid).
-/// 
-/// * `name` - name of folder to verify
-fn ensure_valid_folder(name: &str) -> Result<()> {
-    let valid = 
-        !name.is_empty() && 
-        !name.contains("/") && 
-        !name.contains("\\");
-
-    valid
-        .then_some(())
-        .ok_or(Error::from_string(format!("invalid folder name: '{}'", name).as_str(), ErrorCategory::Repo))
-}
 
 
 /// A structure, that describes a repository for notes.
@@ -95,8 +34,8 @@ impl Repository {
         // we need to create the folder if necessary
         //
 
-        if !is_repos_folder_present() {
-            get_repos_folder()
+        if !helpers::is_repos_folder_present() {
+            helpers::get_repos_folder()
                 .ok_or(Error::from_string("cannot get repositories folder", ErrorCategory::Os))
                 .and_then(misc::create_folder_recursive)?;
         }
@@ -106,9 +45,9 @@ impl Repository {
         // If it doesn't exists, it is neessary to create it.
         //
 
-        let internal_repo = get_repo_path(&repo_name)
+        let internal_repo = helpers::get_repo_path(&repo_name)
             .ok_or(Error::from_string("cannot get repository path", ErrorCategory::Os))
-            .and_then(open_or_create_repository)?;
+            .and_then(helpers::open_or_create_repository)?;
 
         Repository::from_git_repository(internal_repo, repo_name)
     }
@@ -123,7 +62,7 @@ impl Repository {
         // Folder name if any must be valid
         //
 
-        folder.map_or(Ok(()), ensure_valid_folder)?;
+        folder.map_or(Ok(()), helpers::ensure_valid_folder)?;
 
         //
         // Firstly check a folder for existence. If it does not exist,
@@ -170,7 +109,7 @@ impl Repository {
         // Firstly we need to ensure, that we create a valid folder
         //
 
-        ensure_valid_folder(name)?;
+        helpers::ensure_valid_folder(name)?;
 
         //
         // Just create a directory. Nothing else is required.
@@ -195,7 +134,7 @@ impl Repository {
             internal_repo: repo, 
 
             name: repo_name
-                .unwrap_or(MM_MAIN_REPO_NAME)
+                .unwrap_or(defs::MM_MAIN_REPO_NAME)
                 .to_owned(), 
 
             remotes: remotes,
