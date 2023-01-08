@@ -9,6 +9,8 @@ mod repo;
 mod error;
 mod data;
 mod misc;
+mod editor;
+
 
 extern crate clap;
 extern crate git2;
@@ -16,5 +18,10 @@ extern crate dirs;
 
 
 fn main() {
-    
+    let r = repo::Repository::open_or_create(None)
+        .unwrap();
+
+    println!("{:?}", r.add_note("some_note", None).expect("fail").as_os_str());
+
+    //r.commit_changes().unwrap();
 }
