@@ -20,6 +20,9 @@ pub(crate) enum ErrorCategory {
 
     /// Repository error
     Repo,
+
+    /// Editor error
+    Editor,
 }
 
 
