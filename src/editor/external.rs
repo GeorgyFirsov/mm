@@ -2,7 +2,7 @@ use std::process;
 use std::path::Path;
 use std::ffi::OsString;
 
-use super::runner::Editor;
+use super::editor::Editor;
 use crate::error::{ Error, ErrorCategory, Result };
 
 

@@ -1,7 +1,7 @@
 mod xi;
-mod runner;
+mod editor;
 mod external;
 
 
-pub(crate) use self::runner::{ Editor };
+pub(crate) use self::editor::{ Editor };
 pub(crate) use self::external::{ ExternalEditor };
