@@ -8,6 +8,13 @@ repository = "https://github.com/GeorgyFirsov/mm"
 license-file = "LICENSE"
 
 [dependencies]
+
+# Repository support
 git2 = "0.15"
-clap = "4.0.32"
 dirs = "4.0.0"
+
+# CLI
+clap = "4.0.32"
+
+# xi-based editor
+xrl = "0.0.9"
