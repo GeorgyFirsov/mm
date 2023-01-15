@@ -1,3 +1,6 @@
 [submodule "libmm"]
 	path = libmm
 	url = https://github.com/GeorgyFirsov/libmm.git
+[submodule "lib/libmm"]
+	path = lib/libmm
+	url = https://github.com/GeorgyFirsov/libmm.git
