@@ -9,7 +9,7 @@ license-file = "LICENSE"
 
 [dependencies]
 
-#
+# libmm as local library
 libmm = { path = "./lib/libmm" }
 
 # CLI
