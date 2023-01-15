@@ -9,9 +9,8 @@ license-file = "LICENSE"
 
 [dependencies]
 
-# Repository support
-git2 = "0.15"
-dirs = "4.0.0"
+#
+libmm = { path = "./lib/libmm" }
 
 # CLI
 clap = "4.0.32"
