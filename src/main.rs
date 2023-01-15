@@ -5,16 +5,10 @@
 //! to get back to any state.
 
 
-mod repo;
-mod error;
-mod data;
-mod misc;
 mod editor;
 
-
+extern crate libmm;
 extern crate clap;
-extern crate git2;
-extern crate dirs;
 
 
 fn main() {

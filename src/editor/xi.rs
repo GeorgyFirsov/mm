@@ -1,7 +1,7 @@
 use std::path::Path;
 
+use libmm::error::Result;
 use super::Editor;
-use crate::error::Result;
 
 
 /// A struct, that implements a built-in xi-based editor.

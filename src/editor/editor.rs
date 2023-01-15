@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::error::Result;
+use libmm::error::Result;
 
 
 /// A trait, that describes an editor.
