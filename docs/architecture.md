@@ -11,6 +11,7 @@ The app consists of several components:
 - data components: it is responsible for storing any application's data, such as configurations
   and repositories;
 - tree controller: it provides an interface to notes, folders and repositories;
+- configuration component;
 - viewer;
 - editor.
 
@@ -46,3 +47,13 @@ Repositories component provides a way to:
 - enumerate all folders in a repository;
 - enumerate all notes in a folder;
 - enumerate all notes in a repository.
+
+Repositories are located in application's data folder.
+
+### Configuration
+
+Configuration is stored in a file inside of application's data folder. It contains
+the following parameters:
+
+- git account settings (or a flag, that makes `mm` to use current git settings);
+- optional signature (not in sense of cryptography).
