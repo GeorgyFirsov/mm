@@ -10,7 +10,7 @@ use super::editor::Editor;
 /// supported editor there should be a struct, that implements 
 /// this trait.
 pub(crate) trait ExternalEditor {
-    ///
+    /// Returns an executable path or name used for process startup.
     fn executable(&self) -> OsString;
 
     /// Creates a list of arguments from a path to a note to edit.

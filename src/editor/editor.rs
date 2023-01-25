@@ -17,3 +17,15 @@ pub(crate) trait Editor {
     /// * `note_path` - full path to a note to edit
     fn run(&self, note_path: &Path) -> Result<()>;
 }
+
+
+/// A function to launch an editor.
+/// 
+/// Just a proxy function, that accepts an editor and calls its 
+/// `run` method.
+/// 
+/// * `note_path` - full path to a note to edit
+/// * `editor` -  an editor instance
+pub(crate) fn run<E: Editor>(note_path: &Path, editor: E) -> Result<()> {
+    editor.run(note_path)
+}
