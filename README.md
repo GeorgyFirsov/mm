@@ -14,5 +14,5 @@
 Internally it uses `git` to track all the changes step-by-step and allow
 a user to get back to any state.
 
-[1]: https://github.com/GeorgyFirsov/mm/docs
+[1]: https://github.com/GeorgyFirsov/mm/tree/main/docs
 [2]: https://github.com/GeorgyFirsov/libmm
