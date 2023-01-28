@@ -2,7 +2,7 @@ use std::process;
 use std::path::Path;
 use std::ffi::OsString;
 
-use libmm::error::{ Error, ErrorCategory, Result };
+use libmm::error::{Error, ErrorCategory, Result};
 use super::editor::Editor;
 
 
