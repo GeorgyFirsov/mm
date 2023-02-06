@@ -59,5 +59,5 @@ fn wait_editor(mut child: process::Child) -> Result<()> {
     status
         .success()
         .then_some(())
-        .ok_or(Error::from_string(&format!("editor exited with code '{:?}'", code), ErrorCategory::Editor))
+        .ok_or(Error::from_string(format!("editor exited with code '{:?}'", code), ErrorCategory::Editor))
 }
